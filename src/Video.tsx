@@ -15,15 +15,31 @@ import { Scene8_JobSeekers } from './scenes/Scene8_JobSeekers';
 import { Scene9_Apply } from './scenes/Scene9_Apply';
 import { Scene10_CTA } from './scenes/Scene10_CTA';
 import { Scene11_Outro } from './scenes/Scene11_Outro';
+import { DEFAULT_PROPS, type PromoProps } from './props';
+import { HEIGHT, SCENES, WIDTH, type SceneKey } from './timeline';
 
-export const MainVideo: React.FC = () => {
+const SCENE_COMPONENTS: Record<SceneKey, React.FC> = {
+  intro: Scene1_Intro,
+  sectors: Scene2_Sectors,
+  stats: Scene3_Stats,
+  divisions1: Scene4_Divisions1,
+  divisions2: Scene5_Divisions2,
+  verification: Scene6_Verification,
+  process: Scene7_Process,
+  jobSeekers: Scene8_JobSeekers,
+  apply: Scene9_Apply,
+  cta: Scene10_CTA,
+  outro: Scene11_Outro,
+};
+
+export const MainVideo: React.FC<PromoProps> = ({ audioFile = DEFAULT_PROPS.audioFile, audioVolume = DEFAULT_PROPS.audioVolume }) => {
   return (
     <FontLoader>
       <div
         style={{
           position: 'relative',
-          width: 1920,
-          height: 1080,
+          width: WIDTH,
+          height: HEIGHT,
           backgroundColor: '#070D1E',
           overflow: 'hidden',
         }}
@@ -35,63 +51,18 @@ export const MainVideo: React.FC = () => {
         <Header />
         <ProgressBar />
 
-        {/* Voiceover Audio (89.63s duration, synced) */}
-        <Audio src={staticFile('audio.mp3')} />
+        {/* Voice-over / music track: optional, configured through props (see README) */}
+        {audioFile ? <Audio src={staticFile(audioFile)} volume={audioVolume} /> : null}
 
-        {/* Scene 1: 0 - 201 (00:00 - 00:06.7) Brand Intro */}
-        <Sequence from={0} durationInFrames={201}>
-          <Scene1_Intro />
-        </Sequence>
-
-        {/* Scene 2: 201 - 459 (00:06.7 - 00:15.3) Sectors */}
-        <Sequence from={201} durationInFrames={258}>
-          <Scene2_Sectors />
-        </Sequence>
-
-        {/* Scene 3: 459 - 666 (00:15.3 - 00:22.2) Scale & Stats */}
-        <Sequence from={459} durationInFrames={207}>
-          <Scene3_Stats />
-        </Sequence>
-
-        {/* Scene 4: 666 - 966 (00:22.2 - 00:32.2) Divisions 1 to 4 */}
-        <Sequence from={666} durationInFrames={300}>
-          <Scene4_Divisions1 />
-        </Sequence>
-
-        {/* Scene 5: 966 - 1260 (00:32.2 - 00:42.0) Divisions 5 to 8 */}
-        <Sequence from={966} durationInFrames={294}>
-          <Scene5_Divisions2 />
-        </Sequence>
-
-        {/* Scene 6: 1260 - 1539 (00:42.0 - 00:51.3) Verification & Payroll */}
-        <Sequence from={1260} durationInFrames={279}>
-          <Scene6_Verification />
-        </Sequence>
-
-        {/* Scene 7: 1539 - 1809 (00:51.3 - 01:00.3) 4-Step Process */}
-        <Sequence from={1539} durationInFrames={270}>
-          <Scene7_Process />
-        </Sequence>
-
-        {/* Scene 8: 1809 - 2145 (01:00.3 - 01:11.5) Job Seekers */}
-        <Sequence from={1809} durationInFrames={336}>
-          <Scene8_JobSeekers />
-        </Sequence>
-
-        {/* Scene 9: 2145 - 2400 (01:11.5 - 01:20.0) How to Apply */}
-        <Sequence from={2145} durationInFrames={255}>
-          <Scene9_Apply />
-        </Sequence>
-
-        {/* Scene 10: 2400 - 2589 (01:20.0 - 01:26.3) CTA & Contacts */}
-        <Sequence from={2400} durationInFrames={189}>
-          <Scene10_CTA />
-        </Sequence>
-
-        {/* Scene 11: 2589 - 2700 (01:26.3 - 01:30.0) Outro Signature */}
-        <Sequence from={2589} durationInFrames={111}>
-          <Scene11_Outro />
-        </Sequence>
+        {/* Scenes: frame ranges come from src/timeline.ts */}
+        {SCENES.map((scene) => {
+          const SceneComponent = SCENE_COMPONENTS[scene.key];
+          return (
+            <Sequence key={scene.key} from={scene.from} durationInFrames={scene.durationInFrames} name={scene.title}>
+              <SceneComponent />
+            </Sequence>
+          );
+        })}
       </div>
     </FontLoader>
   );
